@@ -71,6 +71,10 @@ body {
   float: both;
 }
 
+.paddle {
+  fill: black;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
     .container {
