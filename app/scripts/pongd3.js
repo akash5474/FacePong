@@ -101,7 +101,7 @@ Ball.prototype.checkCollision = function(ballX, ballY) {
   var bottomPaddle = paddle2;
 
   // Collision with left or right sides
-  if ( ballX - this.radius < 6 || ballX + this.radius > arenaWidth - 6 ) {
+  if ( ballX - this.radius < 8 || ballX + this.radius > arenaWidth - 8 ) {
     this.vector.x = -this.vector.x;
   }
 
@@ -248,10 +248,27 @@ var gameBall = new Ball();
 paddle1.updatePos(arenaWidth / 2, arenaHeight - 15);
 paddle2.updatePos(arenaWidth / 2, 15);
 
-// document.addEventListener('facetrackingEvent', function(ev) {
-//   paddle1.updatePos(ev.x * 2, arenaHeight - 15);
-//   paddle2.updatePos(ev.x * 2, 15);
-// });
+document.addEventListener('facetrackingEvent', function(ev) {
+
+  var evX = ev.x;
+
+  if ( evX <= 90 ) {
+    evX = 90;
+  } else if ( evX >= 310 ) {
+    evX = 310;
+  }
+
+  // console.log('evX', evX);
+
+  var paddleMoveScale = d3.scale.linear().domain([90, 310]).range([500, 0]);
+
+  var x = paddleMoveScale( evX );
+
+  // var x = arenaWidth - ( ev.x * 2 );
+  // console.log('x', x);
+  paddle1.updatePos( x, arenaHeight - 15);
+  paddle2.updatePos( x, 15);
+});
 
 
 run();
