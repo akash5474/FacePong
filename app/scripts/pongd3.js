@@ -44,6 +44,7 @@ Paddle.prototype.updatePos = function(x, y) {
 
 var Ball = function() {
   this.radius = 6;
+  this.paddleHits = 0;
   this.ball = svg.append('circle')
                  .classed('ball', true)
                  .attr({
@@ -56,12 +57,12 @@ var Ball = function() {
   var scale = d3.scale.linear().domain([0, 1]).range([-1, 1]);
   var vecX = scale(Math.random()), vecY = scale(Math.random());
 
-  while ( (vecX < .1 && vecX > -.1) || (vecY < .15 && vecY > -.15) ) {
+  while ( (vecX < .2 && vecX > -.2) || (vecY < .25 && vecY > -.25) ) {
 
-    if ( vecX < .1 && vecX > -.1 ) {
+    if ( vecX < .2 && vecX > -.2 ) {
       vecX = scale(Math.random());
     }
-    if ( vecY < .15 && vecY > -.15 ) {
+    if ( vecY < .25 && vecY > -.25 ) {
       vecY = scale(Math.random());
     }
   }
@@ -84,6 +85,14 @@ Ball.prototype.hasHitPaddle = function(paddle) {
   return ballX + this.radius > paddleX && ballX + this.radius < paddleX + paddleWidth;
 };
 
+Ball.prototype.increaseSpeed = function() {
+  this.paddleHits++;
+
+  if ( this.speed < 100 && this.paddleHits && this.paddleHits % 3 === 0 ) {
+    this.speed += 8;
+  }
+};
+
 Ball.prototype.checkCollision = function(ballX, ballY) {
   var ball = this.ball;
   var ballX = +ball.attr('cx');
@@ -92,27 +101,29 @@ Ball.prototype.checkCollision = function(ballX, ballY) {
   var bottomPaddle = paddle2;
 
   // Collision with left or right sides
-  if ( ballX - this.radius < 4 || ballX + this.radius > arenaWidth - 4 ) {
+  if ( ballX - this.radius < 6 || ballX + this.radius > arenaWidth - 6 ) {
     this.vector.x = -this.vector.x;
   }
 
   // Collision with top paddle
-  if ( ballY - this.radius > +topPaddle.paddle.attr('y') + topPaddle.paddle.attr('height')/2 ) {
+  if ( ballY + this.radius > +topPaddle.paddle.attr('y') ) {
     if ( this.hasHitPaddle(topPaddle) ) {
-      console.log('top paddle collision');
+      // console.log('top paddle collision');
       this.vector.y = -this.vector.y;
-    } else {
-      console.log('collision with top of arena');
+      this.increaseSpeed();
+    } else if ( ballY > +topPaddle.paddle.attr('y') + +topPaddle.paddle.attr('height') ) {
+      // console.log('collision with top of arena');
       return 'top';
     }
   }
 
-  if ( ballY + this.radius < +bottomPaddle.paddle.attr('y') ) {
+  if ( ballY - 2 * this.radius < +bottomPaddle.paddle.attr('y') ) {
     if ( this.hasHitPaddle(bottomPaddle) ) {
-      console.log('bottom paddle collision');
+      // console.log('bottom paddle collision');
       this.vector.y = -this.vector.y;
-    } else {
-      console.log('collision with bottoms of arena');
+      this.increaseSpeed();
+    } else if ( ballY < +bottomPaddle.paddle.attr('y') ) {
+      // console.log('collision with bottoms of arena');
       return 'bottom';
     }
   }
@@ -125,6 +136,9 @@ Ball.prototype.move = function(delta_t) {
   var ball = this.ball;
   var ballX = +ball.attr('cx');
   var ballY = +ball.attr('cy');
+
+  paddle1.updatePos(ballX, arenaHeight - 15);
+  paddle2.updatePos(ballX, 15);
 
   this.ball.attr({
     cx: ballX + ( this.vector.x * this.speed * fps ),
@@ -200,6 +214,8 @@ var makeArena = function() {
      });
 };
 
+var d3TimerInterval = 50;
+
 function run() {
   setTimeout(function() {
     var prevRunTime = Date.now();
@@ -209,15 +225,17 @@ function run() {
       var scored = gameBall.move( now - prevRunTime );
 
       prevRunTime = now;
+      d3TimerInterval = 200;
 
       if ( scored ) {
         d3.select('.ball').remove();
+        d3TimerInterval = 50;
         gameBall = new Ball();
         run();
       }
 
       return scored;
-    }, 50);
+    }, d3TimerInterval);
   }, 3000);
 };
 
@@ -230,10 +248,10 @@ var gameBall = new Ball();
 paddle1.updatePos(arenaWidth / 2, arenaHeight - 15);
 paddle2.updatePos(arenaWidth / 2, 15);
 
-document.addEventListener('facetrackingEvent', function(ev) {
-  paddle1.updatePos(ev.x * 2, arenaHeight - 15);
-  paddle2.updatePos(ev.x * 2, 15);
-});
+// document.addEventListener('facetrackingEvent', function(ev) {
+//   paddle1.updatePos(ev.x * 2, arenaHeight - 15);
+//   paddle2.updatePos(ev.x * 2, 15);
+// });
 
 
 run();
