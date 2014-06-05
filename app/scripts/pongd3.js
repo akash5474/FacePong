@@ -108,22 +108,22 @@ Ball.prototype.checkCollision = function(ballX, ballY) {
   // Collision with top paddle
   if ( ballY + this.radius > +topPaddle.paddle.attr('y') ) {
     if ( this.hasHitPaddle(topPaddle) ) {
-      // console.log('top paddle collision');
+      console.log('top paddle collision');
       this.vector.y = -this.vector.y;
       this.increaseSpeed();
     } else if ( ballY > +topPaddle.paddle.attr('y') + +topPaddle.paddle.attr('height') ) {
-      // console.log('collision with top of arena');
+      console.log('collision with top of arena');
       return 'top';
     }
   }
 
   if ( ballY - 2 * this.radius < +bottomPaddle.paddle.attr('y') ) {
     if ( this.hasHitPaddle(bottomPaddle) ) {
-      // console.log('bottom paddle collision');
+      console.log('bottom paddle collision');
       this.vector.y = -this.vector.y;
       this.increaseSpeed();
     } else if ( ballY < +bottomPaddle.paddle.attr('y') ) {
-      // console.log('collision with bottoms of arena');
+      console.log('collision with bottoms of arena');
       return 'bottom';
     }
   }
@@ -137,8 +137,8 @@ Ball.prototype.move = function(delta_t) {
   var ballX = +ball.attr('cx');
   var ballY = +ball.attr('cy');
 
-  paddle1.updatePos(ballX, arenaHeight - 15);
-  paddle2.updatePos(ballX, 15);
+  // paddle1.updatePos(ballX, arenaHeight - 15);
+  // paddle2.updatePos(ballX, 15);
 
   this.ball.attr({
     cx: ballX + ( this.vector.x * this.speed * fps ),
@@ -225,11 +225,11 @@ function run() {
       var scored = gameBall.move( now - prevRunTime );
 
       prevRunTime = now;
-      d3TimerInterval = 200;
+      // d3TimerInterval = 200;
 
       if ( scored ) {
         d3.select('.ball').remove();
-        d3TimerInterval = 50;
+        // d3TimerInterval = 50;
         gameBall = new Ball();
         run();
       }
@@ -264,12 +264,15 @@ document.addEventListener('facetrackingEvent', function(ev) {
 
   var x = paddleMoveScale( evX );
 
-  // var x = arenaWidth - ( ev.x * 2 );
   // console.log('x', x);
-  paddle1.updatePos( x, arenaHeight - 15);
-  paddle2.updatePos( x, 15);
+  paddle1.updatePos(x, arenaHeight - 15);
+  paddle2.updatePos(x, 15);
 });
 
+document.addEventListener('headtrackrStatus', function(ev) {
+  if ( ev.status === 'found' ) {
+    run();
+  }
+});
 
-run();
 
