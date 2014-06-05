@@ -16,10 +16,11 @@ var svg = d3.select('#arena')
               'height': arenaHeight
             });
 
-var Paddle = function() {
+var Paddle = function(side) {
   this.height = 10, this.width = 80;
   this.paddle = svg.append('rect')
                    .classed('paddle', true)
+                   .classed(side + '_paddle', true)
                    .attr({
                      'height': this.height,
                      'width': this.width
@@ -41,11 +42,109 @@ Paddle.prototype.updatePos = function(x, y) {
         });
 };
 
+var Ball = function() {
+  this.radius = 6;
+  this.ball = svg.append('circle')
+                 .classed('ball', true)
+                 .attr({
+                   r: this.radius,
+                   cx: ( arenaWidth / 2 ) - ( this.radius / 2 ),
+                   cy: ( arenaHeight / 2 ) - ( this.radius / 2 )
+                 });
+
+  // Scale to turn math.random between -1 & 1
+  var scale = d3.scale.linear().domain([0, 1]).range([-1, 1]);
+  var vecX = scale(Math.random()), vecY = scale(Math.random());
+
+  while ( (vecX < .1 && vecX > -.1) || (vecY < .15 && vecY > -.15) ) {
+
+    if ( vecX < .1 && vecX > -.1 ) {
+      vecX = scale(Math.random());
+    }
+    if ( vecY < .15 && vecY > -.15 ) {
+      vecY = scale(Math.random());
+    }
+  }
+
+  this.vector = {
+    x: vecX,
+    y: vecY
+  };
+
+  this.speed = 16;
+};
+
+Ball.prototype.hasHitPaddle = function(paddle) {
+  // debugger;
+  var ballX = +this.ball.attr('cx');
+  var paddleX = +paddle.paddle.attr('x');
+  var paddleWidth = +paddle.paddle.attr('width');
+
+  // top && bottom
+  return ballX + this.radius > paddleX && ballX + this.radius < paddleX + paddleWidth;
+};
+
+Ball.prototype.checkCollision = function(ballX, ballY) {
+  var ball = this.ball;
+  var ballX = +ball.attr('cx');
+  var ballY = +ball.attr('cy');
+  var topPaddle = paddle1;
+  var bottomPaddle = paddle2;
+
+  // Collision with left or right sides
+  if ( ballX - this.radius < 4 || ballX + this.radius > arenaWidth - 4 ) {
+    this.vector.x = -this.vector.x;
+  }
+
+  // Collision with top paddle
+  if ( ballY - this.radius > +topPaddle.paddle.attr('y') + topPaddle.paddle.attr('height')/2 ) {
+    if ( this.hasHitPaddle(topPaddle) ) {
+      console.log('top paddle collision');
+      this.vector.y = -this.vector.y;
+    } else {
+      console.log('collision with top of arena');
+      return 'top';
+    }
+  }
+
+  if ( ballY + this.radius < +bottomPaddle.paddle.attr('y') ) {
+    if ( this.hasHitPaddle(bottomPaddle) ) {
+      console.log('bottom paddle collision');
+      this.vector.y = -this.vector.y;
+    } else {
+      console.log('collision with bottoms of arena');
+      return 'bottom';
+    }
+  }
+
+  return false;
+};
+
+Ball.prototype.move = function(delta_t) {
+  var fps = delta_t > 0 ? ( delta_t / 100 ) : 1;
+  var ball = this.ball;
+  var ballX = +ball.attr('cx');
+  var ballY = +ball.attr('cy');
+
+  this.ball.attr({
+    cx: ballX + ( this.vector.x * this.speed * fps ),
+    cy: ballY + ( this.vector.y * this.speed * fps )
+  });
+
+  // debugger;
+  var scored = this.checkCollision(ballX, ballY);
+
+  if ( scored ) {
+    return true;
+  }
+
+  return false;
+};
+
 var makeArena = function() {
   var strokeWidth = 4
 
   // Left Boundary
-
   svg.append('line')
      .attr({
        'x1': 2,
@@ -57,7 +156,6 @@ var makeArena = function() {
      });
 
   // Right Boundary
-
   svg.append('line')
      .attr({
        'x1': arenaWidth - 2,
@@ -69,7 +167,6 @@ var makeArena = function() {
      });
 
   // Top Boundary
-
   svg.append('line')
      .attr({
        'x1': 0,
@@ -81,7 +178,6 @@ var makeArena = function() {
      });
 
   // Bottom Boundary
-
   svg.append('line')
      .attr({
        'x1': 0,
@@ -93,7 +189,6 @@ var makeArena = function() {
      });
 
   // Middle Line
-
   svg.append('line')
      .attr({
        'x1': 4,
@@ -105,15 +200,41 @@ var makeArena = function() {
      });
 };
 
+function run() {
+  setTimeout(function() {
+    var prevRunTime = Date.now();
+
+    d3.timer(function() {
+      var now = Date.now();
+      var scored = gameBall.move( now - prevRunTime );
+
+      prevRunTime = now;
+
+      if ( scored ) {
+        d3.select('.ball').remove();
+        gameBall = new Ball();
+        run();
+      }
+
+      return scored;
+    }, 50);
+  }, 3000);
+};
+
 makeArena();
 
-var player1 = new Paddle();
-var player2 = new Paddle();
+var paddle1 = new Paddle('top');
+var paddle2 = new Paddle('bottom');
+var gameBall = new Ball();
 
-player1.updatePos(arenaWidth / 2, arenaHeight - 15);
-player2.updatePos(arenaWidth / 2, 15);
+paddle1.updatePos(arenaWidth / 2, arenaHeight - 15);
+paddle2.updatePos(arenaWidth / 2, 15);
 
 document.addEventListener('facetrackingEvent', function(ev) {
-  player1.updatePos(ev.x * 2, arenaHeight - 15);
-  player2.updatePos(ev.x * 2, 15);
+  paddle1.updatePos(ev.x * 2, arenaHeight - 15);
+  paddle2.updatePos(ev.x * 2, 15);
 });
+
+
+run();
+
