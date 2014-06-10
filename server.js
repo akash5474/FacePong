@@ -1,9 +1,12 @@
+
 'use strict';
 
 var express = require('express'),
     path = require('path'),
     fs = require('fs'),
     mongoose = require('mongoose');
+
+var PeerServer = require('peer').PeerServer;
 
 /**
  * Main application file
@@ -37,6 +40,16 @@ require('./lib/routes')(app);
 // Start server
 app.listen(config.port, config.ip, function () {
   console.log('Express server listening on %s:%d, in %s mode', config.ip, config.port, app.get('env'));
+
+  var peerServer = new PeerServer({port:3000, path:'/arena'});
+
+  peerServer.on('connection', function(id) {
+    console.log('Connection from ' + id);
+  });
+
+  peerServer.on('disconnect', function(id) {
+    console.log('Disconnect of ' + id);
+  });
 });
 
 // Expose app
