@@ -311,6 +311,7 @@ angular.module('facePongApp')
 
     document.addEventListener('headtrackrStatus', function(ev) {
       if ( ev.status === 'found' ) {
+        // gameBall = new Ball();
         if ( $scope.host ) {
           run();
         }
@@ -341,7 +342,9 @@ angular.module('facePongApp')
 
     // startCam();
 
-    var peer = new Peer({host: 'localhost', port: 3000, path: '/arena'});
+    console.log(location.hostname);
+
+    var peer = new Peer({host: location.hostname, port: 3000, path: '/arena'});
     var peerConnToMe;
 
     peer.on('open', function(id) {
@@ -390,8 +393,12 @@ angular.module('facePongApp')
     };
 
     $scope.joinGame = function() {
-      $http.get('/arena/joinpool/' + $scope.playerPeer.myId ).success(function() {
+      $http.get('/arena/joinpool/' + $scope.playerPeer.myId ).success(function(data) {
         console.log('frontend peer joining pool', $scope.playerPeer.myId);
+        console.log('opponent id', data.oppId);
+        if ( data.oppId ) {
+          $scope.connectToPeer(data.oppId);
+        }
       });
     };
 
