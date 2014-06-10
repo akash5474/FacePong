@@ -183,6 +183,14 @@ angular.module('facePongApp')
     var makeArena = function() {
       var strokeWidth = 4
 
+      // Background
+      svg.append('rect')
+         .classed('pongTable', true)
+         .attr({
+           height: arenaHeight,
+           width: arenaWidth
+         });
+
       // Left Boundary
       svg.append('line')
          .attr({
@@ -191,7 +199,7 @@ angular.module('facePongApp')
            'y1': 0,
            'y2': arenaHeight,
            'stroke-width': strokeWidth,
-           'stroke': 'black'
+           'stroke': 'grey'
          });
 
       // Right Boundary
@@ -202,7 +210,7 @@ angular.module('facePongApp')
            'y1': 0,
            'y2': arenaHeight,
            'stroke-width': strokeWidth,
-           'stroke': 'black'
+           'stroke': 'grey'
          });
 
       // Top Boundary
@@ -213,7 +221,7 @@ angular.module('facePongApp')
            'y1': 2,
            'y2': 2,
            'stroke-width': strokeWidth,
-           'stroke': 'black'
+           'stroke': 'grey'
          });
 
       // Bottom Boundary
@@ -224,7 +232,7 @@ angular.module('facePongApp')
            'y1': arenaHeight - 2,
            'y2': arenaHeight - 2,
            'stroke-width': strokeWidth,
-           'stroke': 'black'
+           'stroke': 'grey'
          });
 
       // Middle Line
@@ -309,6 +317,8 @@ angular.module('facePongApp')
       }
     });
 
+    $scope.playerPeer = {'myId': ''};
+
     $scope.peerIdInput = { 'id': '' };
     $scope.sendData;
 
@@ -335,6 +345,7 @@ angular.module('facePongApp')
     var peerConnToMe;
 
     peer.on('open', function(id) {
+      $scope.playerPeer.myId = id;
       angular.element('#myPeerId').html('Your id is: <strong>' + id + '</strong>');
     });
 
@@ -371,11 +382,17 @@ angular.module('facePongApp')
       alert(err.message);
     });
 
-    $scope.connectToPeer = function() {
-      var oppId = $scope.peerIdInput.id;
+    $scope.connectToPeer = function(peerId) {
+      var oppId = peerId || $scope.peerIdInput.id;
       var conn = peer.connect(oppId);
       $scope.host = true;
       console.log('This is the host');
+    };
+
+    $scope.joinGame = function() {
+      $http.get('/arena/joinpool/' + $scope.playerPeer.myId ).success(function() {
+        console.log('frontend peer joining pool', $scope.playerPeer.myId);
+      });
     };
 
     // $scope.sendData = function() {

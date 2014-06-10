@@ -13,6 +13,7 @@ $icon-font-path: "/bower_components/bootstrap-sass-official/vendor/assets/fonts/
 body {
     padding-top: 20px;
     padding-bottom: 20px;
+    background-color: #6363A3;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -72,7 +73,15 @@ body {
 }
 
 .paddle {
-  fill: black;
+  fill: white;
+}
+
+.ball {
+  fill: white;
+}
+
+.pongTable {
+  fill: #141447;
 }
 
 /* Responsive: Portrait tablets and up */
