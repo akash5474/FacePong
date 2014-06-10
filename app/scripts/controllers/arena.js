@@ -12,6 +12,10 @@ angular.module('facePongApp')
                   'height': arenaHeight
                 });
 
+    $scope.host = false;
+
+    $scope.connected = false;
+
     var Paddle = function(side) {
       this.height = 10, this.width = 80;
       this.paddle = svg.append('rect')
@@ -144,7 +148,9 @@ angular.module('facePongApp')
         cy: newCY
       });
 
-      peerConnToMe.send( {'ball': { cx: newCX, cy: newCY } } );
+      if ( $scope.host ) {
+        peerConnToMe.send( {'ball': { cx: newCX, cy: newCY } } );
+      }
 
       // debugger;
       var scored = this.checkCollision(ballX, ballY);
@@ -268,15 +274,20 @@ angular.module('facePongApp')
       var x = paddleMoveScale( evX );
 
       // console.log('x', x);
-      paddle1.updatePos(x, arenaHeight - 15);
+      if ( $scope.host ) {
+        paddle1.updatePos(x, arenaHeight - 15);
+      } else {
+        paddle2.updatePos(x, 15);
+      }
       // myConn.send({'xPos': x});
-      paddle2.updatePos(x, 15);
       peerConnToMe.send({'faceMove': x});
     });
 
     document.addEventListener('headtrackrStatus', function(ev) {
       if ( ev.status === 'found' ) {
-        run();
+        if ( $scope.host ) {
+          run();
+        }
       }
     });
 
@@ -315,19 +326,25 @@ angular.module('facePongApp')
       if ( !peerConnToMe ) {
         console.log('peer has connected to me', conn.peer);
         peerConnToMe = peer.connect(conn.peer);
+        $scope.connected = true;
         startCam();
       }
 
       conn.on('data', function(data) {
         console.log(data);
         if ( data.faceMove ) {
-          paddle1.updatePos(data.faceMove, arenaHeight - 15);
-          paddle2.updatePos(data.faceMove, 15);
+          if ( $scope.host ) {
+            paddle2.updatePos(data.faceMove, 15);
+          } else {
+            paddle1.updatePos(data.faceMove, arenaHeight - 15);
+          }
         } else if ( data.ball ) {
-          gameBall.ball.attr({
-            cx: data.ball.cx,
-            cy: data.ball.cy
-          });
+          if ( !$scope.host ) {
+            gameBall.ball.attr({
+              cx: data.ball.cx,
+              cy: data.ball.cy
+            });
+          }
         }
       });
     });
@@ -339,71 +356,13 @@ angular.module('facePongApp')
     $scope.connectToPeer = function() {
       var oppId = $scope.peerIdInput.id;
       var conn = peer.connect(oppId);
+      $scope.host = true;
+      console.log('This is the host');
     };
 
-    $scope.sendData = function() {
-      peerConnToMe.send({'testData': 'Testing 1 2 3...'});
-    };
-
-    // $scope.startGame = function() {
-    //   setTimeout(function() {
-    //     console.log('starting game');
-    //     run();
-    //   }, 3500);
+    // $scope.sendData = function() {
+    //   peerConnToMe.send({'testData': 'Testing 1 2 3...'});
     // };
 
-    // var peer = new Peer({host: 'localhost', port: 3000, path: '/arena'});
 
-    // peer.on('open', function(id) {
-    //   console.log(id);
-    //   angular.element('#myPeerId').html('Your id is: <strong>' + id + '</strong>');
-    // });
-
-    // peer.on('connection', function(conn) {
-    //   conn.on('open', function() {
-    //     // console.log('peer has connected to me');
-    //     myConn = peer.connect(conn.peer);
-
-    //     myConn.on('open', function() {
-    //       $scope.sendData = function() {
-    //         myConn.send({'myData': 'data sent to peer'});
-    //       };
-    //     });
-
-    //     myConn.on('data', function(data) {
-    //       console.log('myConn:\t', data);
-    //     });
-
-    //   });
-
-    //   startCam();
-
-    //   conn.on('data', function(data) {
-    //     console.log('conn:\t', data);
-    //   });
-
-    //   var videoInput = document.getElementById('inputVideo');
-    //   var canvasInput = document.getElementById('inputCanvas');
-
-    //   var htracker = new headtrackr.Tracker();
-    //   htracker.init(videoInput, canvasInput);
-    //   htracker.start();
-    // });
-
-    // peer.on('error', function(err) {
-    //   console.log(err);
-    // });
-
-    // $scope.connectToPeer = function() {
-    //   var oppId = $scope.peerIdInput.id;
-    //   // console.log(oppId);
-    //   var conn = peer.connect(oppId);
-    //   conn.on('open', function() {
-
-    //   });
-
-    //   $scope.sendData = function() {
-    //     conn.send({'myData': 'data sent to peer'});
-    //   };
-    // };
   });

@@ -6,7 +6,7 @@
   <div class="col-lg-9">
     <canvas id="inputCanvas" width="400" height="200" style="display:none"></canvas>
     <video id="inputVideo" autoplay loop></video>
-    <button class="btn btn-primary" type="submit" ng-click="startGame()">Start Game</button>
+<!--     <button class="btn btn-primary" type="submit" ng-click="startGame()">Start Game</button> -->
   </div>
 </div>
 <div class="row">
@@ -20,8 +20,8 @@
       <input type="text" ng-model="peerIdInput.id">
       <input type="submit" value="Submit">
     </form>
-    <form ng-click="sendData()">
-      <input type="submit" value="Send Data">
-    </form>
+<!--     <form ng-click="sendData()">
+      <input ng-disabled="connected" type="submit" value="Send Data">
+    </form> -->
   </div>
 </div>
