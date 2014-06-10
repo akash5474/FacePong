@@ -101,8 +101,18 @@ angular.module('facePongApp')
       var bottomPaddle = paddle2;
 
       // Collision with left or right sides
-      if ( ballX - this.radius < 8 || ballX + this.radius > arenaWidth - 8 ) {
+      if ( ballX - this.radius < 6 ) {
         this.vector.x = -this.vector.x;
+        ball.attr({
+          cx: 7 + this.radius,
+          cy: ballY
+        });
+      } else if ( ballX + this.radius > arenaWidth - 6 ) {
+        this.vector.x = -this.vector.x;
+        ball.attr({
+          cx: arenaWidth - 7 - this.radius,
+          cy: ballY
+        });
       }
 
       // Collision with top paddle
@@ -110,6 +120,10 @@ angular.module('facePongApp')
         if ( this.hasHitPaddle(topPaddle) ) {
           console.log('top paddle collision');
           this.vector.y = -this.vector.y;
+          ball.attr({
+            cx: ballX,
+            cy: +topPaddle.paddle.attr('y') - this.radius - 1
+          });
           this.increaseSpeed();
         } else if ( ballY > +topPaddle.paddle.attr('y') + +topPaddle.paddle.attr('height') ) {
           console.log('collision with top of arena');
@@ -117,10 +131,14 @@ angular.module('facePongApp')
         }
       }
 
-      if ( ballY - 2 * this.radius < +bottomPaddle.paddle.attr('y') ) {
+      if ( ballY - this.radius < +bottomPaddle.paddle.attr('y') + +bottomPaddle.paddle.attr('height')/2 ) {
         if ( this.hasHitPaddle(bottomPaddle) ) {
           console.log('bottom paddle collision');
           this.vector.y = -this.vector.y;
+          ball.attr({
+            cx: ballX,
+            cy: +bottomPaddle.paddle.attr('y') + this.radius + +bottomPaddle.paddle.attr('height') + 1
+          });
           this.increaseSpeed();
         } else if ( ballY < +bottomPaddle.paddle.attr('y') ) {
           console.log('collision with bottoms of arena');
@@ -221,7 +239,7 @@ angular.module('facePongApp')
          });
     };
 
-    var d3TimerInterval = 50;
+    // var d3TimerInterval = 50;
 
     function run() {
       setTimeout(function() {
@@ -242,7 +260,7 @@ angular.module('facePongApp')
           }
 
           return scored;
-        }, d3TimerInterval);
+        }, 50);
       }, 3000);
     };
 
@@ -331,7 +349,7 @@ angular.module('facePongApp')
       }
 
       conn.on('data', function(data) {
-        console.log(data);
+        // console.log(data);
         if ( data.faceMove ) {
           if ( $scope.host ) {
             paddle2.updatePos(data.faceMove, 15);
