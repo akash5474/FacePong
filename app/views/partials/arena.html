@@ -1,27 +1,33 @@
 <div ng-include="'partials/navbar.html'"></div>
 <div class="row">
-  <div class="col-lg-3">
+  <div class="col-lg-3" ng-hide="disableJoins">
     <form ng-submit="connectToPeer()">
       <div class="text-muted">
         <p id="myPeerId"></p>
         <p>Enter opponent's id:</p>
       </div>
       <input type="text" ng-model="peerIdInput.id">
-      <input type="submit" value="Submit">
+      <input type="submit" value="Submit" ng-disabled="disableJoins">
     </form>
     <br>
     <form ng-submit="joinGame()">
-      <input type="submit" value="Join A Game">
+      <input type="submit" value="Join A Game" ng-disabled="disableJoins">
     </form>
   </div>
   <div class="col-lg-9">
+    <div class="text-muted">
+      <h2 ng-show="disableJoins">Allow camera access to join a game.</h2>
+    </div>
     <canvas id="inputCanvas" width="400" height="200" style="display:none"></canvas>
     <video id="inputVideo" autoplay loop></video>
 <!--     <button class="btn btn-primary" type="submit" ng-click="startGame()">Start Game</button> -->
   </div>
 </div>
 <div class="row">
-  <div class="col-lg-6 col-lg-offset-3" id="arena">
+  <div class="col-lg-3 text-muted">
+    You: {{ host ? score.score.host : score.score.client }} Opponent: {{ host ? score.score.client : score.score.host }}
+  </div>
+  <div class="col-lg-6" id="arena">
     <!-- <canvas id="gameCanvas" width="500" height="400"></canvas> -->
   </div>
 </div>

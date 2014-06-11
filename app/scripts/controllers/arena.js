@@ -16,6 +16,12 @@ angular.module('facePongApp')
 
     $scope.connected = false;
 
+    $scope.disableJoins = true;
+
+    $scope.running = false;
+
+    $scope.score = { score: { host: 0, client: 0 } };
+
     var Paddle = function(side) {
       this.height = 10, this.width = 80;
       this.paddle = svg.append('rect')
@@ -119,10 +125,10 @@ angular.module('facePongApp')
         });
       }
 
-      // Collision with top paddle
+      // Collision with bottom paddle
       if ( ballY + this.radius > +topPaddle.paddle.attr('y') ) {
         if ( this.hasHitPaddle(topPaddle) ) {
-          console.log('top paddle collision');
+          // console.log('bottom paddle collision');
           this.vector.y = -this.vector.y;
           ball.attr({
             cx: ballX,
@@ -130,15 +136,22 @@ angular.module('facePongApp')
           });
           this.increaseSpeed();
         } else if ( ballY > +topPaddle.paddle.attr('y') + +topPaddle.paddle.attr('height') ) {
-          console.log('collision with top of arena');
-          peerConnToMe.send({ scored: 'top' });
+          // console.log('collision with bottom of arena');
+
+          $scope.$apply(function() {
+            $scope.score.score.client++;
+          });
+
+          // console.log($scope.score);
+          peerConnToMe.send($scope.score);
           return 'top';
         }
       }
 
+      // Collision with top paddle
       if ( ballY - this.radius < +bottomPaddle.paddle.attr('y') + +bottomPaddle.paddle.attr('height')/2 ) {
         if ( this.hasHitPaddle(bottomPaddle) ) {
-          console.log('bottom paddle collision');
+          // console.log('top paddle collision');
           this.vector.y = -this.vector.y;
           ball.attr({
             cx: ballX,
@@ -146,8 +159,14 @@ angular.module('facePongApp')
           });
           this.increaseSpeed();
         } else if ( ballY < +bottomPaddle.paddle.attr('y') ) {
-          console.log('collision with bottoms of arena');
-          peerConnToMe.send({ scored: 'bottom' });
+          // console.log('collision with top of arena');
+
+          $scope.$apply(function() {
+            $scope.score.score.host++;
+          });
+
+          // console.log($scope.score)
+          peerConnToMe.send($scope.score);
           return 'bottom';
         }
       }
@@ -270,7 +289,9 @@ angular.module('facePongApp')
             d3.select('.ball').remove();
             // d3TimerInterval = 50;
             gameBall = new Ball();
-            run();
+            if ( $scope.score.score.host < 5 && $scope.score.score.client < 5 ) {
+              run();
+            }
           }
 
           return scored;
@@ -312,15 +333,23 @@ angular.module('facePongApp')
         paddle2.updatePos(x, 15);
       }
       // myConn.send({'xPos': x});
-      peerConnToMe.send({'faceMove': x});
+      if ( $scope.connected ) {
+        peerConnToMe.send({'faceMove': x});
+      }
     });
 
     document.addEventListener('headtrackrStatus', function(ev) {
       if ( ev.status === 'found' ) {
         // gameBall = new Ball();
-        if ( $scope.host ) {
-          run();
-        }
+        // if ( $scope.host && $scope.connected && !$scope.running ) {
+        //   console.log('headtrackr status found... running game');
+        //   run();
+        //   $scope.running = true;
+        // }
+      } else if ( ev.status === 'camera found' ) {
+        $scope.$apply(function() {
+          $scope.disableJoins = false;
+        });
       }
     });
 
@@ -348,7 +377,7 @@ angular.module('facePongApp')
 
     startCam();
 
-    console.log(location.hostname);
+    // console.log(location.hostname);
 
     var peer = new Peer({host: location.hostname, port: 3000, path: '/arena'});
     var peerConnToMe;
@@ -367,6 +396,7 @@ angular.module('facePongApp')
         $scope.connected = true;
         if ( $scope.host ) {
           run();
+          $scope.running = true;
         }
         // startCam();
       }
@@ -386,8 +416,12 @@ angular.module('facePongApp')
               cy: data.ball.cy
             });
           }
-        } else if ( data.scored ) {
+        } else if ( data.score ) {
           if ( !$scope.host ) {
+            // console.log(data.score);
+            $scope.$apply(function() {
+              $scope.score = { score: data.score };
+            });
             d3.select('.ball').remove();
             gameBall = new Ball();
           }
@@ -424,14 +458,22 @@ angular.module('facePongApp')
     $scope.connectToPeer = function(peerId) {
       var oppId = peerId || $scope.peerIdInput.id;
       var conn = peer.connect(oppId);
-      $scope.host = true;
-      console.log('This is the host');
+      if ( oppId ) {
+        $scope.host = true;
+        console.log('This is the host');
+      }
     };
 
     $scope.joinGame = function() {
+
+      if ( $scope.connected ) {
+        console.log('Already connected');
+        return;
+      }
+
       $http.get('/arena/joinpool/' + $scope.playerPeer.myId ).success(function(data) {
-        console.log('frontend peer joining pool', $scope.playerPeer.myId);
-        console.log('opponent id', data.oppId);
+        // console.log('frontend peer joining pool', $scope.playerPeer.myId);
+        // console.log('opponent id', data.oppId);
         if ( data.oppId ) {
           $scope.connectToPeer(data.oppId);
 
