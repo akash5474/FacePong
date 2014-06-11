@@ -72,7 +72,10 @@ angular.module('facePongApp')
         y: vecY
       };
 
-      this.speed = 16;
+      this.speed = {
+        x: 16,
+        y: 16
+      };
     };
 
     Ball.prototype.hasHitPaddle = function(paddle) {
@@ -88,8 +91,9 @@ angular.module('facePongApp')
     Ball.prototype.increaseSpeed = function() {
       this.paddleHits++;
 
-      if ( this.speed < 100 && this.paddleHits && this.paddleHits % 3 === 0 ) {
-        this.speed += 8;
+      if ( this.speed.y < 100 && this.paddleHits && this.paddleHits % 3 === 0 ) {
+        this.speed.y += 8;
+        this.speed.x += 4;
       }
     };
 
@@ -127,6 +131,7 @@ angular.module('facePongApp')
           this.increaseSpeed();
         } else if ( ballY > +topPaddle.paddle.attr('y') + +topPaddle.paddle.attr('height') ) {
           console.log('collision with top of arena');
+          peerConnToMe.send({ scored: 'top' });
           return 'top';
         }
       }
@@ -142,6 +147,7 @@ angular.module('facePongApp')
           this.increaseSpeed();
         } else if ( ballY < +bottomPaddle.paddle.attr('y') ) {
           console.log('collision with bottoms of arena');
+          peerConnToMe.send({ scored: 'bottom' });
           return 'bottom';
         }
       }
@@ -158,8 +164,8 @@ angular.module('facePongApp')
       // paddle1.updatePos(ballX, arenaHeight - 15);
       // paddle2.updatePos(ballX, 15);
 
-      var newCX = ballX + ( this.vector.x * this.speed * fps );
-      var newCY = ballY + ( this.vector.y * this.speed * fps );
+      var newCX = ballX + ( this.vector.x * this.speed.x * fps );
+      var newCY = ballY + ( this.vector.y * this.speed.y * fps );
 
       this.ball.attr({
         cx: newCX,
@@ -340,7 +346,7 @@ angular.module('facePongApp')
       };
     })();
 
-    // startCam();
+    startCam();
 
     console.log(location.hostname);
 
@@ -359,7 +365,10 @@ angular.module('facePongApp')
         console.log('peer has connected to me', conn.peer);
         peerConnToMe = peer.connect(conn.peer);
         $scope.connected = true;
-        startCam();
+        if ( $scope.host ) {
+          run();
+        }
+        // startCam();
       }
 
       conn.on('data', function(data) {
@@ -377,9 +386,36 @@ angular.module('facePongApp')
               cy: data.ball.cy
             });
           }
+        } else if ( data.scored ) {
+          if ( !$scope.host ) {
+            d3.select('.ball').remove();
+            gameBall = new Ball();
+          }
         }
       });
+
+      conn.on('close', function() {
+        console.log('closed data connection');
+      });
+
+      conn.on('error', function(err) {
+        alert(err);
+      });
     });
+
+    // var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    // peer.on('call', function(call) {
+    //   console.log('call received');
+    //   getUserMedia({video: true, audio: false}, function(stream) {
+    //     call.answer(stream); // Answer the call with an A/V stream.
+    //     call.on('stream', function(remoteStream) {
+    //       // Show stream in some video/canvas element.
+    //       console.log('streaming video');
+    //     });
+    //   }, function(err) {
+    //     console.log('Failed to get local stream' ,err);
+    //   });
+    // });
 
     peer.on('error', function(err) {
       alert(err.message);
@@ -398,6 +434,18 @@ angular.module('facePongApp')
         console.log('opponent id', data.oppId);
         if ( data.oppId ) {
           $scope.connectToPeer(data.oppId);
+
+          // var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+          // getUserMedia({video: true, audio: false}, function(stream) {
+          //   console.log('call sent');
+          //   var call = peer.call(data.oppId, stream);
+          //   call.on('stream', function(remoteStream) {
+          //     // Show stream in some video/canvas element.
+          //     console.log('streaming video');
+          //   });
+          // }, function(err) {
+          //   console.log('Failed to get local stream' ,err);
+          // });
         }
       });
     };

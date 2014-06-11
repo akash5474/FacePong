@@ -7,6 +7,7 @@ var express = require('express'),
     mongoose = require('mongoose');
 
 var PeerServer = require('peer').PeerServer;
+var removeUserFromPool = require('./lib/controllers/userpool').removeUserFromPool;
 
 /**
  * Main application file
@@ -49,6 +50,7 @@ app.listen(config.port, config.ip, function () {
 
   peerServer.on('disconnect', function(id) {
     console.log('Disconnect of ' + id);
+    removeUserFromPool(id);
   });
 });
 
