@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('facePongApp')
-  .controller('ArenaCtrl', function ($scope, $http, paddle) {
+  .controller('ArenaCtrl', function ($scope, $http, PaddleFactory, ArenaFactory) {
 
     var arenaWidth = 500, arenaHeight = 500;
 
@@ -22,7 +22,8 @@ angular.module('facePongApp')
 
     $scope.score = { score: { host: 0, client: 0 } };
 
-    var Paddle = paddle;
+    var Paddle = PaddleFactory;
+    var makeArena = ArenaFactory;
 
     var Ball = function() {
       this.radius = 6;
@@ -181,75 +182,6 @@ angular.module('facePongApp')
       return false;
     };
 
-    var makeArena = function() {
-      var strokeWidth = 4
-
-      // Background
-      svg.append('rect')
-         .classed('pongTable', true)
-         .attr({
-           height: arenaHeight,
-           width: arenaWidth
-         });
-
-      // Left Boundary
-      svg.append('line')
-         .attr({
-           'x1': 2,
-           'x2': 2,
-           'y1': 0,
-           'y2': arenaHeight,
-           'stroke-width': strokeWidth,
-           'stroke': 'grey'
-         });
-
-      // Right Boundary
-      svg.append('line')
-         .attr({
-           'x1': arenaWidth - 2,
-           'x2': arenaWidth - 2,
-           'y1': 0,
-           'y2': arenaHeight,
-           'stroke-width': strokeWidth,
-           'stroke': 'grey'
-         });
-
-      // Top Boundary
-      svg.append('line')
-         .attr({
-           'x1': 0,
-           'x2': arenaWidth,
-           'y1': 2,
-           'y2': 2,
-           'stroke-width': strokeWidth,
-           'stroke': 'grey'
-         });
-
-      // Bottom Boundary
-      svg.append('line')
-         .attr({
-           'x1': 0,
-           'x2': arenaWidth,
-           'y1': arenaHeight - 2,
-           'y2': arenaHeight - 2,
-           'stroke-width': strokeWidth,
-           'stroke': 'grey'
-         });
-
-      // Middle Line
-      svg.append('line')
-         .attr({
-           'x1': 4,
-           'x2': arenaWidth - 4,
-           'y1': ( arenaHeight / 2 ) - 2,
-           'y2': ( arenaHeight / 2 ) - 2,
-           'stroke-width': strokeWidth,
-           'stroke': 'grey'
-         });
-    };
-
-    // var d3TimerInterval = 50;
-
     function run() {
       setTimeout(function() {
         var prevRunTime = Date.now();
@@ -275,7 +207,7 @@ angular.module('facePongApp')
       }, 3000);
     };
 
-    makeArena();
+    makeArena(svg, arenaWidth, arenaHeight);
 
     var paddle1 = new Paddle('top', svg);
     var paddle2 = new Paddle('bottom', svg);
