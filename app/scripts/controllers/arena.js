@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('facePongApp')
-  .controller('ArenaCtrl', function ($scope, $http) {
+  .controller('ArenaCtrl', function ($scope, $http, paddle) {
 
     var arenaWidth = 500, arenaHeight = 500;
 
@@ -22,31 +22,7 @@ angular.module('facePongApp')
 
     $scope.score = { score: { host: 0, client: 0 } };
 
-    var Paddle = function(side) {
-      this.height = 10, this.width = 80;
-      this.paddle = svg.append('rect')
-                       .classed('paddle', true)
-                       .classed(side + '_paddle', true)
-                       .attr({
-                         'height': this.height,
-                         'width': this.width
-                       });
-    };
-
-    Paddle.prototype.updatePos = function(x, y) {
-      if ( x - ( this.width / 2 ) <= 1 ) {
-        x = 1;
-      } else if ( x >= arenaWidth - 1 - ( this.width / 2 ) ) {
-        x = arenaWidth - this.width - 1;
-      } else {
-        x -= this.width / 2;
-      }
-
-      this.paddle.attr({
-              x: x,
-              y: y - ( this.height / 2 )
-            });
-    };
+    var Paddle = paddle;
 
     var Ball = function() {
       this.radius = 6;
@@ -301,12 +277,12 @@ angular.module('facePongApp')
 
     makeArena();
 
-    var paddle1 = new Paddle('top');
-    var paddle2 = new Paddle('bottom');
+    var paddle1 = new Paddle('top', svg);
+    var paddle2 = new Paddle('bottom', svg);
     var gameBall = new Ball();
 
-    paddle1.updatePos(arenaWidth / 2, arenaHeight - 15);
-    paddle2.updatePos(arenaWidth / 2, 15);
+    paddle1.updatePos(arenaWidth / 2, arenaHeight - 15, arenaWidth);
+    paddle2.updatePos(arenaWidth / 2, 15, arenaWidth);
 
     var myConn;
 
@@ -328,9 +304,9 @@ angular.module('facePongApp')
 
       // console.log('x', x);
       if ( $scope.host ) {
-        paddle1.updatePos(x, arenaHeight - 15);
+        paddle1.updatePos(x, arenaHeight - 15, arenaWidth);
       } else {
-        paddle2.updatePos(x, 15);
+        paddle2.updatePos(x, 15, arenaWidth);
       }
       // myConn.send({'xPos': x});
       if ( $scope.connected ) {
@@ -405,9 +381,9 @@ angular.module('facePongApp')
         // console.log(data);
         if ( data.faceMove ) {
           if ( $scope.host ) {
-            paddle2.updatePos(data.faceMove, 15);
+            paddle2.updatePos(data.faceMove, 15, arenaWidth);
           } else {
-            paddle1.updatePos(data.faceMove, arenaHeight - 15);
+            paddle1.updatePos(data.faceMove, arenaHeight - 15, arenaWidth);
           }
         } else if ( data.ball ) {
           if ( !$scope.host ) {

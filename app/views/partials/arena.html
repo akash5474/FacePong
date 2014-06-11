@@ -14,7 +14,7 @@
       <input type="submit" value="Join A Game" ng-disabled="disableJoins">
     </form>
   </div>
-  <div class="col-lg-9">
+  <div class="col-lg-6 col-lg-offset-3">
     <div class="text-muted">
       <h2 ng-show="disableJoins">Allow camera access to join a game.</h2>
     </div>
@@ -24,10 +24,10 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-lg-3 text-muted">
-    You: {{ host ? score.score.host : score.score.client }} Opponent: {{ host ? score.score.client : score.score.host }}
-  </div>
-  <div class="col-lg-6" id="arena">
+  <div class="col-lg-6 col-lg-offset-3" id="arena">
     <!-- <canvas id="gameCanvas" width="500" height="400"></canvas> -->
+  </div>
+  <div class="col-lg-3 col-lg-offset-9 text-muted">
+    <h2>You: {{ host ? score.score.host : score.score.client }} Opponent: {{ host ? score.score.client : score.score.host }}</h2>
   </div>
 </div>
