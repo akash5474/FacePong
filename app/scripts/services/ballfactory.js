@@ -2,17 +2,17 @@
 
 angular.module('facePongApp')
   .factory('BallFactory', function () {
-    var Ball = function(svg, arenaWidth, arenaHeight, scope) {
+    var Ball = function(svg, arenaWidth, arenaHeight) {
       this.radius = 6;
       this.paddleHits = 0;
-      this.peerConnToMe;
-      this.$scope = scope;
+      this.arenaWidth = arenaWidth;
+      this.arenaHeight = arenaHeight;
       this.ball = svg.append('circle')
                      .classed('ball', true)
                      .attr({
                        r: this.radius,
-                       cx: ( arenaWidth / 2 ) - ( this.radius / 2 ),
-                       cy: ( arenaHeight / 2 ) - ( this.radius / 2 )
+                       cx: ( this.arenaWidth / 2 ) - ( this.radius / 2 ),
+                       cy: ( this.arenaHeight / 2 ) - ( this.radius / 2 )
                      });
 
       // Scale to turn math.random between -1 & 1
@@ -59,12 +59,12 @@ angular.module('facePongApp')
       }
     };
 
-    Ball.prototype.checkCollision = function(ballX, ballY) {
+    Ball.prototype.checkCollision = function(ballX, ballY, $scope, peerConnToMe, topPaddle, bottomPaddle) {
       var ball = this.ball;
       var ballX = +ball.attr('cx');
       var ballY = +ball.attr('cy');
-      var topPaddle = paddle1;
-      var bottomPaddle = paddle2;
+      // var topPaddle = paddle1;
+      // var bottomPaddle = paddle2;
 
       // Collision with left or right sides
       if ( ballX - this.radius < 6 ) {
@@ -73,10 +73,10 @@ angular.module('facePongApp')
           cx: 7 + this.radius,
           cy: ballY
         });
-      } else if ( ballX + this.radius > arenaWidth - 6 ) {
+      } else if ( ballX + this.radius > this.arenaWidth - 6 ) {
         this.vector.x = -this.vector.x;
         ball.attr({
-          cx: arenaWidth - 7 - this.radius,
+          cx: this.arenaWidth - 7 - this.radius,
           cy: ballY
         });
       }
@@ -94,12 +94,12 @@ angular.module('facePongApp')
         } else if ( ballY > +topPaddle.paddle.attr('y') + +topPaddle.paddle.attr('height') ) {
           // console.log('collision with bottom of arena');
 
-          this.$scope.$apply(function() {
-            this.$scope.score.score.client++;
+          $scope.$apply(function() {
+            $scope.score.score.client++;
           });
 
-          // console.log(this.$scope.score);
-          this.peerConnToMe.send(this.$scope.score);
+          // console.log($scope.score);
+          peerConnToMe.send($scope.score);
           return 'top';
         }
       }
@@ -117,12 +117,12 @@ angular.module('facePongApp')
         } else if ( ballY < +bottomPaddle.paddle.attr('y') ) {
           // console.log('collision with top of arena');
 
-          this.$scope.$apply(function() {
-            this.$scope.score.score.host++;
+          $scope.$apply(function() {
+            $scope.score.score.host++;
           });
 
-          // console.log(this.$scope.score)
-          this.peerConnToMe.send(this.$scope.score);
+          // console.log($scope.score)
+          peerConnToMe.send($scope.score);
           return 'bottom';
         }
       }
@@ -130,7 +130,7 @@ angular.module('facePongApp')
       return false;
     };
 
-    Ball.prototype.move = function(delta_t) {
+    Ball.prototype.move = function(delta_t, $scope, peerConnToMe, paddle1, paddle2) {
       var fps = delta_t > 0 ? ( delta_t / 100 ) : 1;
       var ball = this.ball;
       var ballX = +ball.attr('cx');
@@ -144,12 +144,12 @@ angular.module('facePongApp')
         cy: newCY
       });
 
-      if ( this.$scope.host ) {
-        this.peerConnToMe.send( {'ball': { cx: newCX, cy: newCY } } );
+      if ( $scope.host ) {
+        peerConnToMe.send( {'ball': { cx: newCX, cy: newCY } } );
       }
 
       // debugger;
-      var scored = this.checkCollision(ballX, ballY);
+      var scored = this.checkCollision(ballX, ballY, $scope, peerConnToMe, paddle1, paddle2);
 
       if ( scored ) {
         return true;
