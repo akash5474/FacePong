@@ -13,7 +13,35 @@ $icon-font-path: "/bower_components/bootstrap-sass-official/vendor/assets/fonts/
 body {
     padding-top: 20px;
     padding-bottom: 20px;
-    background-color: #6363A3;
+    background-color: #DFD911;
+    font-family: 'Baumans', sans-serif;
+}
+
+.join-text {
+  font-size: 1.3em;
+}
+
+.title {
+  text-align: center;
+  margin-top: 30px;
+  margin-left: 15px;
+  border: 5px solid black;
+  border-radius: 25px;
+  vertical-align: middle;
+}
+
+.vid {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.score-text {
+  font-size: 2em;
+  color: white;
+}
+
+span.glyphicon-arrow-up {
+  font-size: 8em;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */
@@ -84,8 +112,25 @@ body {
   fill: #141447;
 }
 
+.center {
+  text-align: center;
+}
+
+#arena {
+  text-align: center;
+}
+
+#game {
+  background-color: black;
+}
+
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
+    #game {
+      border-width: 10px;
+      border-radius: 50px;
+    }
+
     .container {
         max-width: 1000px;
     }

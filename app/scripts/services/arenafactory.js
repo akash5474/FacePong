@@ -10,8 +10,9 @@ angular.module('facePongApp')
          .classed('pongTable', true)
          .attr({
            height: arenaHeight,
-           width: arenaWidth
-         });
+           width: arenaWidth,
+         })
+         .style('fill', 'black');
 
       // Left Boundary
       svg.append('line')
