@@ -73,7 +73,7 @@ angular.module('facePongProdApp')
             d3.select('.ball').remove();
             // d3TimerInterval = 50;
             gameBall = new Ball(svg, arenaWidth, arenaHeight);
-            if ( $scope.score.score.host < 1 && $scope.score.score.client < 1 ) {
+            if ( $scope.score.score.host < 5 && $scope.score.score.client < 5 ) {
               run();
             } else {
               if ( $scope.score.score.host === 1 ) {
