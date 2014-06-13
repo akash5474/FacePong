@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('facePongApp')
+angular.module('facePongProdApp')
   .factory('ArenaFactory', function () {
+
     var makeArena = function(svg, arenaWidth, arenaHeight) {
       var strokeWidth = 4
 

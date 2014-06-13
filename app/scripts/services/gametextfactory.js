@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('facePongApp')
+angular.module('facePongProdApp')
   .factory('GameTextFactory', function () {
 
     var GameText = function(svg, text, arenaWidth, arenaHeight) {

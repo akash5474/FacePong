@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('facePongApp')
+angular.module('facePongProdApp')
   .factory('BallFactory', function () {
+
     var Ball = function(svg, arenaWidth, arenaHeight) {
       this.radius = 6;
       this.paddleHits = 0;

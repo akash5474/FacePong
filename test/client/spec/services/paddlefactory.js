@@ -3,7 +3,7 @@
 describe('Service: PaddleFactory', function () {
 
   // load the service's module
-  beforeEach(module('facePongApp'));
+  beforeEach(module('facePongProdApp'));
 
   // instantiate service
   var PaddleFactory;

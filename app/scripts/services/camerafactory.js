@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('facePongApp')
-  .factory('WebCamFactory', function () {
+angular.module('facePongProdApp')
+  .factory('CameraFactory', function () {
+
     return (function() {
 
       var camNotStarted = true;

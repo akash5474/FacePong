@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('facePongApp')
+angular.module('facePongProdApp')
   .factory('PaddleFactory', function () {
+
     var Paddle = function(side, svg) {
       this.height = 10, this.width = 80;
       this.paddle = svg.append('rect')
