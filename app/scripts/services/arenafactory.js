@@ -23,7 +23,7 @@ angular.module('facePongProdApp')
            'y1': 0,
            'y2': arenaHeight,
            'stroke-width': strokeWidth,
-           'stroke': 'grey'
+           'stroke': 'lightgrey'
          });
 
       // Right Boundary
@@ -34,7 +34,7 @@ angular.module('facePongProdApp')
            'y1': 0,
            'y2': arenaHeight,
            'stroke-width': strokeWidth,
-           'stroke': 'grey'
+           'stroke': 'lightgrey'
          });
 
       // Top Boundary
@@ -45,7 +45,7 @@ angular.module('facePongProdApp')
            'y1': 2,
            'y2': 2,
            'stroke-width': strokeWidth,
-           'stroke': 'grey'
+           'stroke': 'lightgrey'
          });
 
       // Bottom Boundary
@@ -56,7 +56,7 @@ angular.module('facePongProdApp')
            'y1': arenaHeight - 2,
            'y2': arenaHeight - 2,
            'stroke-width': strokeWidth,
-           'stroke': 'grey'
+           'stroke': 'lightgrey'
          });
 
       // Middle Line
@@ -67,7 +67,7 @@ angular.module('facePongProdApp')
            'y1': ( arenaHeight / 2 ) - 2,
            'y2': ( arenaHeight / 2 ) - 2,
            'stroke-width': strokeWidth,
-           'stroke': 'grey'
+           'stroke': 'lightgrey'
          });
     };
 

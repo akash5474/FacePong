@@ -15,7 +15,6 @@ angular.module('facePongProdApp')
     $scope.host = false;
     $scope.connected = false;
     $scope.disableJoins = true;
-    $scope.running = false;
     $scope.score = { score: { host: 0, client: 0 } };
 
     var Paddle = PaddleFactory;
@@ -34,6 +33,25 @@ angular.module('facePongProdApp')
 
     paddle1.updatePos(arenaWidth / 2, arenaHeight - 15, arenaWidth);
     paddle2.updatePos(arenaWidth / 2, 15, arenaWidth);
+
+    var peer = new Peer({host: location.hostname, port: 3000, path: '/arena'});
+    var peerConnToMe;
+
+    var endGameAndReset = function() {
+      peerConnToMe.close();
+
+      gameText.text = 'Join Another Match Above';
+      gameText.display();
+
+      d3.select('.ball').remove();
+      gameBall = new Ball(svg, arenaWidth, arenaHeight);
+
+      $scope.$apply(function() {
+        $scope.host = false;
+        $scope.connected = false;
+        $scope.score = { score: { host: 0, client: 0 } };
+      });
+    };
 
     function run() {
       gameText.text = 'Starting Point!'
@@ -55,10 +73,10 @@ angular.module('facePongProdApp')
             d3.select('.ball').remove();
             // d3TimerInterval = 50;
             gameBall = new Ball(svg, arenaWidth, arenaHeight);
-            if ( $scope.score.score.host < 5 && $scope.score.score.client < 5 ) {
+            if ( $scope.score.score.host < 1 && $scope.score.score.client < 1 ) {
               run();
             } else {
-              if ( $scope.score.score.host === 5 ) {
+              if ( $scope.score.score.host === 1 ) {
                 gameText.text = 'YOU WIN!'
                 gameText.display();
                 peerConnToMe.send({ result: 'lose' });
@@ -67,6 +85,9 @@ angular.module('facePongProdApp')
                 gameText.display();
                 peerConnToMe.send({ result: 'win' });
               }
+              setTimeout(function() {
+                endGameAndReset();
+              }, 3000);
             }
           }
 
@@ -113,8 +134,6 @@ angular.module('facePongProdApp')
         // }
       } else if ( ev.status === 'camera found' ) {
         $scope.$apply(function() {
-          gameText.remove();
-          gameText.text = 'Finding Opponent...';
           $scope.disableJoins = false;
         });
       }
@@ -129,16 +148,13 @@ angular.module('facePongProdApp')
 
     // console.log(location.hostname);
 
-    var peer = new Peer({host: location.hostname, port: 3000, path: '/arena'});
-    var peerConnToMe;
-
     peer.on('open', function(id) {
       $scope.playerPeer.myId = id;
       angular.element('#myPeerId').html('Your id is: <strong>' + id + '</strong>');
     });
 
     peer.on('connection', function(conn) {
-
+      console.log('peerConnToMe', peerConnToMe);
       // Connect back to peer
       if ( !peerConnToMe ) {
         console.log('peer has connected to me', conn.peer);
@@ -149,7 +165,6 @@ angular.module('facePongProdApp')
 
         if ( $scope.host ) {
           run();
-          $scope.running = true;
         } else {
           gameText.text = 'Starting Point!'
           gameText.display();
@@ -159,6 +174,12 @@ angular.module('facePongProdApp')
         }
         // startCam();
       }
+
+      conn.on('close', function() {
+        console.log('Peer connection has been closed');
+        peerConnToMe.close();
+        peerConnToMe = null;
+      });
 
       conn.on('data', function(data) {
         // console.log(data);
@@ -198,11 +219,10 @@ angular.module('facePongProdApp')
             gameText.text = 'YOU LOSE!'
             gameText.display();
           }
+          setTimeout(function() {
+            endGameAndReset();
+          }, 3000);
         }
-      });
-
-      conn.on('close', function() {
-        console.log('closed data connection');
       });
 
       conn.on('error', function(err) {
@@ -238,6 +258,7 @@ angular.module('facePongProdApp')
     };
 
     $scope.joinGame = function() {
+      gameText.text = 'Finding Opponent...';
       gameText.display();
       if ( $scope.connected ) {
         console.log('Already connected');

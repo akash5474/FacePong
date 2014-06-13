@@ -17,9 +17,12 @@
       <form ng-submit="joinGame()">
         <input type="submit" value="Join A Game" ng-disabled="disableJoins">
       </form>
+      <form ng-submit="restartGame()" ng-show="gameOver">
+        <input type="submit" value="Restart Game">
+      </form>
     </div>
   </div>
-  <div class="col-lg-8 col-md-8" ng-show="disableJoins">
+  <div class="col-lg-8 col-md-8 pull-right" ng-show="disableJoins">
     <div>
       <span class="glyphicon glyphicon-arrow-up"></span>
       <h2 ng-show="disableJoins">Allow camera access to join a game</h2>
