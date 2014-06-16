@@ -76,11 +76,11 @@ angular.module('facePongProdApp')
             if ( $scope.score.score.host < 5 && $scope.score.score.client < 5 ) {
               run();
             } else {
-              if ( $scope.score.score.host === 1 ) {
+              if ( $scope.score.score.host === 5 ) {
                 gameText.text = 'YOU WIN!'
                 gameText.display();
                 peerConnToMe.send({ result: 'lose' });
-              } else {
+              } else if ( $scope.score.score.client === 5 ) {
                 gameText.text = 'YOU LOSE!'
                 gameText.display();
                 peerConnToMe.send({ result: 'win' });
